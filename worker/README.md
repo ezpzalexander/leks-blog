@@ -10,6 +10,7 @@ Set these in Cloudflare Workers as secrets:
 - `TELEGRAM_SECRET_TOKEN`: any random secret string. Use the same value when registering the Telegram webhook.
 - `TELEGRAM_ALLOWED_USER_IDS`: comma-separated Telegram user IDs allowed to create posts.
 - `GITHUB_TOKEN`: GitHub fine-grained personal access token with write access to repository contents.
+- `OPENAI_API_KEY`: OpenAI API key for AI rewriting.
 
 Plain variables are in `wrangler.toml`:
 
@@ -17,6 +18,8 @@ Plain variables are in `wrangler.toml`:
 - `GITHUB_REPO`
 - `GITHUB_BRANCH`
 - `PUBLISH_FROM_TELEGRAM`
+- `AI_REWRITE_DEFAULT`
+- `OPENAI_MODEL`
 
 ## Telegram webhook
 
@@ -54,3 +57,25 @@ New content
 ```
 
 Use `/list` to see the slugs. Every change commits to GitHub and triggers the static site rebuild.
+
+## Rewrite with AI
+
+Use these commands when you want the Worker to rewrite your rough Telegram text before publishing:
+
+```text
+/ai Rough title
+rough notes or messy post text
+```
+
+```text
+/aidraft Rough title
+rough draft text
+```
+
+```text
+/aiedit slug
+New rough title
+New rough content
+```
+
+Set `AI_REWRITE_DEFAULT` to `true` if every normal Telegram post should be rewritten automatically.

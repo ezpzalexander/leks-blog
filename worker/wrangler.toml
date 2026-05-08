@@ -7,9 +7,12 @@ GITHUB_OWNER = "ezpzalexander"
 GITHUB_REPO = "leks-blog"
 GITHUB_BRANCH = "main"
 PUBLISH_FROM_TELEGRAM = "true"
+AI_REWRITE_DEFAULT = "false"
+OPENAI_MODEL = "gpt-4.1-mini"
 
 # Set these as Cloudflare Worker secrets, not plain vars:
 # TELEGRAM_BOT_TOKEN
 # TELEGRAM_SECRET_TOKEN
 # TELEGRAM_ALLOWED_USER_IDS
 # GITHUB_TOKEN
+# OPENAI_API_KEY

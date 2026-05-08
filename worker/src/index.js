@@ -54,13 +54,16 @@ export default {
       }
     }
 
-    const post = parsePost(text, env.PUBLISH_FROM_TELEGRAM !== "false");
+    let post = parsePost(text, env.PUBLISH_FROM_TELEGRAM !== "false");
     if (!post) {
       await telegramReply(env, chatId, "Send a title on the first line and the post content below it.");
       return json({ ok: true });
     }
 
     try {
+      if (post.rewrite || env.AI_REWRITE_DEFAULT === "true") {
+        post = await rewritePostWithAI(env, post);
+      }
       const result = await createGitHubPost(env, post);
       const status = post.published ? "published" : "saved as draft";
       await telegramReply(env, chatId, `Post ${status}: <b>${escapeHtml(post.title)}</b>\n${escapeHtml(result.html_url || result.path)}`);
@@ -105,11 +108,12 @@ async function handleCommand(env, chatId, text) {
     return true;
   }
 
-  if (command === "/edit") {
+  if (command === "/edit" || command === "/aiedit") {
     requireSlug(slug);
     const body = rest.join("\n").trim();
-    const edited = parsePost(body, true);
+    let edited = parsePost(body, true);
     if (!edited) throw new Error("Use /edit slug, then title on the next line and content below it.");
+    if (command === "/aiedit") edited = await rewritePostWithAI(env, edited);
     const current = await getGitHubPost(env, slug);
     current.meta.title = edited.title;
     current.meta.published = edited.published ? "true" : "false";
@@ -125,9 +129,12 @@ async function handleCommand(env, chatId, text) {
 
 function parsePost(text, publishByDefault) {
   let published = publishByDefault;
-  const command = text.match(/^\/(post|draft)(?:@\w+)?\s*(.*)$/is);
+  let rewrite = false;
+  const command = text.match(/^\/(post|draft|ai|aidraft)(?:@\w+)?\s*(.*)$/is);
   if (command) {
-    published = command[1].toLowerCase() === "post";
+    const mode = command[1].toLowerCase();
+    published = mode === "post" || mode === "ai";
+    rewrite = mode === "ai" || mode === "aidraft";
     text = command[2].trim();
   }
 
@@ -140,7 +147,84 @@ function parsePost(text, publishByDefault) {
     title,
     content,
     published,
+    rewrite,
     date: new Date().toISOString().slice(0, 10),
+  };
+}
+
+async function rewritePostWithAI(env, post) {
+  const apiKey = required(env.OPENAI_API_KEY, "OPENAI_API_KEY");
+  const model = env.OPENAI_MODEL || "gpt-4.1-mini";
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      input: [
+        {
+          role: "system",
+          content: [
+            {
+              type: "input_text",
+              text: [
+                "Rewrite a Telegram draft into a polished blog post.",
+                "Keep the author's intent, facts, language, and personality.",
+                "Improve clarity, structure, spelling, and flow.",
+                "Do not invent facts, links, dates, names, or claims.",
+                "Return only JSON with keys title and content.",
+              ].join(" "),
+            },
+          ],
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: `Title: ${post.title}\n\nContent:\n${post.content}`,
+            },
+          ],
+        },
+      ],
+      text: {
+        format: {
+          type: "json_schema",
+          name: "rewritten_blog_post",
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              title: { type: "string" },
+              content: { type: "string" },
+            },
+            required: ["title", "content"],
+          },
+          strict: true,
+        },
+      },
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error?.message || `OpenAI returned ${response.status}`);
+
+  const outputText = extractResponseText(data);
+  if (!outputText) throw new Error("OpenAI returned no rewritten text.");
+
+  let rewritten;
+  try {
+    rewritten = JSON.parse(outputText);
+  } catch {
+    throw new Error("OpenAI returned invalid JSON.");
+  }
+
+  return {
+    ...post,
+    title: String(rewritten.title || post.title).trim().slice(0, 120) || post.title,
+    content: String(rewritten.content || post.content).trim() || post.content,
+    rewrite: false,
   };
 }
 
@@ -351,6 +435,16 @@ function base64Decode(value) {
   return new TextDecoder().decode(bytes);
 }
 
+function extractResponseText(data) {
+  if (typeof data.output_text === "string") return data.output_text;
+  for (const item of data.output || []) {
+    for (const content of item.content || []) {
+      if (typeof content.text === "string") return content.text;
+    }
+  }
+  return "";
+}
+
 function cleanSlug(value) {
   return String(value || "").toLowerCase().replace(/[^a-z0-9-]/g, "");
 }
@@ -373,8 +467,12 @@ function helpText() {
     "/edit slug",
     "New title",
     "New content",
+    "/aiedit slug",
+    "New rough title",
+    "New rough content",
     "",
     "Use /draft before a new title to create a draft.",
+    "Use /ai or /aidraft before a new title to rewrite with AI first.",
   ].join("\n");
 }
 
