@@ -1,0 +1,20 @@
+title: Immich Auto-Update Launcher
+description: A Windows batch script that starts Docker Desktop if needed, then pulls the latest Immich images and brings the stack back up automatically.
+image: uploads/immich.png
+tags: Batch, Docker
+url: 
+github: 
+featured: false
+published: true
+date: 2026-03-19
+---
+## What I built
+A small Windows batch script that handles the full Immich startup and update flow in one double-click. It checks if Docker Desktop is running, waits for it if not, then pulls the latest Immich images, brings the stack down and back up cleanly, and prunes old image layers to keep disk usage in check.
+
+## Tech stack
+- **Windows Batch** for the script
+- **Docker Compose** for container orchestration
+- **Docker Desktop** as the runtime on Windows
+
+## What I learned
+The main trick was the polling loop — `docker info` returns a non-zero exit code while Docker Desktop is still starting up, so a `goto waitloop` keeps retrying every 3 seconds until the daemon responds. Without this, `docker-compose pull` fires too early and fails silently. Also worth knowing: on Windows `docker-compose down` + `up -d` is required to actually pick up newly pulled images — a plain `up -d` without `down` first will leave the old containers running even if newer images exist.

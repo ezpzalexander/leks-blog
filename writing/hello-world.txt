@@ -1,0 +1,14 @@
+title: Hello World
+date: 2026-03-21
+tags: general
+status: published
+---
+This is my first article. Welcome to my portfolio!
+
+## What I build
+
+I make things for the web. This site is a place to show my work and share what I learn along the way.
+
+## Get in touch
+
+Feel free to reach out if you want to collaborate on something.

@@ -1,0 +1,20 @@
+title: Telegram Always-Online (Oracle Cloud)
+description: A Python script running on a free Oracle Cloud VPS that keeps a Telegram account's status permanently online using the Pyrogram MTProto client.
+image: https://www.freepnglogos.com/uploads/telegram-logo-21.png
+tags: Python, Linux, Oracle Cloud
+url: 
+github: 
+featured: false
+published: true
+date: 2026-03-13
+---
+## What I built
+A lightweight Python script that runs 24/7 on a free Oracle Cloud instance and sends a Telegram UpdateStatus RPC call every 30 seconds to keep an account's online status active permanently — no browser, no Telegram Desktop required.
+
+## Tech stack
+- **Oracle Cloud Free Tier** (VM.Standard.E2.1.Micro, Ubuntu 22.04) as the always-on host
+- **Pyrogram** for Telegram MTProto API calls
+- **screen** to keep the process running after closing SSH
+
+## What I learned
+Getting Pyrogram to run on Python 3.13 required manually calling `asyncio.set_event_loop(asyncio.new_event_loop())` before importing the library, since Python 3.13 removed the implicit default event loop. The bigger issue was authenticating from a fresh Oracle server IP — Telegram silently blocks verification codes from unfamiliar datacenter IPs, so the fix was generating a Pyrogram session string from a trusted home machine first and hardcoding it into the server script, bypassing the login flow entirely. Also worth knowing: saving iptables rules without explicitly including port 22 will lock you out of SSH on the next reboot.

@@ -1,0 +1,29 @@
+title: OpenClaw Discord Bot (Docker)
+description: Setting up the OpenClaw AI assistant as a Discord bot running in Docker on Windows, including gateway auth, device pairing and Discord intent configuration.
+image: https://platform.theverge.com/wp-content/uploads/sites/2/2026/02/STKB382_OPEN_CLAW_A.jpg?quality=90&strip=all&crop=0,0,100,100
+tags: Docker, JavaScript, Discord
+url: 
+github: 
+featured: false
+published: true
+date: 2026-02-22
+---
+## What I built
+Got OpenClaw — an open-source AI assistant platform — running as a Discord bot via Docker on Windows, connected to a Google Gemini model. The bot responds to DMs in Discord and can hold conversations through OpenClaw's gateway system.
+
+## Tech stack
+- **OpenClaw** as the AI assistant gateway and channel router
+- **Docker Compose** for running the gateway container on Windows
+- **Discord.js** (internal to OpenClaw) for the Discord channel integration
+- **Google Gemini** (`gemini-3-pro-preview`) as the backing model via OpenClaw's agent config
+
+## What I learned
+Getting OpenClaw working involved several layers of debugging that aren't obvious from the documentation.
+
+The first hurdle was that the local npm install was broken — `openclaw.mjs` simply wasn't present after `npm install -g openclaw`. The Docker setup turned out to be the more reliable path on Windows, avoiding the local install entirely.
+
+The Discord channel kept crash-looping on startup because of Discord error 4014 — the bot was requesting the Message Content Intent but it wasn't enabled. This has to be turned on manually in the Discord Developer Portal under the bot's Privileged Gateway Intents settings, and it's not obvious from the error message alone that the portal is where you fix it.
+
+The gateway uses a device token system to authenticate CLI commands against the running gateway process. If the config JSON is edited manually (via `sed` or `vi` inside the container) and the tokens drift out of sync, every subsequent CLI command fails with `device token mismatch (rotate/reissue device token)`. The fix is to always pass `--token <gateway-token>` explicitly on CLI invocations rather than relying on the stored device token in the config file. Generating a fresh dashboard URL with `node dist/index.js dashboard --no-open --token <token>` and then approving the pending device request via `devices approve` is the correct flow for getting the web UI connected.
+
+The `dmPolicy: "open"` setting also requires `allowFrom: ["*"]` to be set simultaneously — setting one without the other causes a config validation error that prevents the gateway from starting. And the `auth.mode: "none"` option, while tempting for debugging, causes the gateway to refuse to bind entirely when running in loopback mode, so it's a dead end.

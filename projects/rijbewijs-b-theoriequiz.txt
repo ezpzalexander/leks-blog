@@ -1,0 +1,20 @@
+title: Rijbewijs B Theoriequiz
+description: Een interactieve quiz met 300 vragen over de Belgische verkeersregels, gegenereerd uit 32 officiële PDF-leerstofbestanden.
+image: uploads/rijbewijs.png
+tags: HTML, CSS, JavaScript
+url: 
+github: 
+featured: false
+published: true
+date: 2026-03-21
+---
+## What I built
+A single-page quiz app covering the full Belgian driving theory curriculum. It scrapes the chapter structure from gratisrijbewijsonline.be, which publishes 32 PDF study documents, and turns that into 300 questions across 9 chapters — road types, speed limits, right of way, parking, alcohol rules, vehicle tech, and more. You can filter by chapter, get instant feedback with an explanation after every answer, and see a results screen with a score ring at the end.
+
+## Tech stack
+- **HTML/CSS/JS** — no frameworks, everything in a single self-contained file
+- **CSS custom properties** for dark-themed design and consistent styling
+- **Vanilla JS** for quiz state, chapter filtering, score tracking and shuffle logic
+
+## What I learned
+Writing 300 questions by hand — each with three plausible wrong answers and a clear explanation — gives you a real appreciation for exam question design. On the code side it was a good exercise in keeping plain JS clean without reaching for a framework: one shared state object, no dependencies, fully portable HTML file.

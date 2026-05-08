@@ -1,0 +1,15 @@
+# Runtime data and secrets
+/data/*.json
+!/data/.htaccess
+
+# Local backups
+*.bak
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log

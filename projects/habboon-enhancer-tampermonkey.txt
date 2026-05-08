@@ -1,0 +1,23 @@
+title: Habboon Enhancer (Tampermonkey)
+description: A Tampermonkey userscript that enhances the Habboon Habbo private server client with a live chat log, room user list, mass friend requests, and more.
+image: uploads/habboon.png
+tags: JavaScript, Tampermonkey, WebSocket
+url: 
+github: 
+featured: false
+published: true
+date: 2026-03-14
+---
+## What I built
+A Tampermonkey userscript for the Habboon Habbo private server that intercepts the game's WebSocket connection to add features the client doesn't have: a draggable chat log panel with real usernames, a live room user list, auto-accept incoming friend requests, mass friend request sender, anti-idle, and auto-reconnect on disconnect.
+
+## Tech stack
+- **Tampermonkey** for script injection at document-start
+- **WebSocket Proxy API** to intercept binary game packets before the Nitro client sees them
+- **Web Audio API** for whisper/mention sound notifications
+- **Vanilla JS** for all UI panels (draggable, no dependencies)
+
+## What I learned
+The hardest part was the packet interception itself. The Habboon client (Nitro + Arcturus emulator) uses a custom binary protocol and opens its WebSocket during page load, so standard `document-end` injection is too late. The solution was a `Proxy` on the native `WebSocket` constructor — every socket the game creates gets our listeners attached automatically, and crucially `instanceof WebSocket` still returns true so the client's own checks don't break.
+
+From there, every feature required reverse-engineering the actual packet header IDs for this specific server build by logging raw bytes and correlating them with in-game actions. Chat turned out to be header 1446, room entities 374, outgoing chat 1314, and so on — none of which matched the standard Arcturus defaults documented online.

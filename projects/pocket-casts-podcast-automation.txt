@@ -1,0 +1,22 @@
+title: Pocket Casts Podcast Automation
+description: A PowerShell pipeline that syncs your Pocket Casts library, downloads episodes, auto-transcribes with Whisper, and builds a local HTML player.
+image: uploads/pc.png
+tags: PowerShell, Whisper, Python
+url: 
+github: 
+featured: false
+published: true
+date: 2026-03-05
+---
+## What I built
+A set of PowerShell scripts that connect to the unofficial Pocket Casts API, download your Up Next queue and in-progress episodes, transcribe them locally with OpenAI Whisper, and generate a searchable HTML player page with collapsible transcripts — all runnable from the terminal with no paid services.
+
+## Tech stack
+- **PowerShell** for all scripting and Pocket Casts API calls
+- **Pocket Casts unofficial API** for authentication and episode queue access
+- **Podcast Index API** as a fallback for feed resolution via OPML
+- **OpenAI Whisper** (Python) for local audio transcription
+- **HTML/CSS/JS** for the generated episode player page
+
+## What I learned
+The Pocket Casts API is completely undocumented and has no official Windows support, so most of the work was reverse-engineering endpoints and dealing with Windows-specific pain: execution policy restrictions, short path names mangling Cargo build directories, and UTF-8 filenames getting corrupted on download. Getting Rust/Cargo to compile on Windows without MSVC also turned into a whole detour. The actual logic once everything was wired up was straightforward — the infrastructure was the hard part.

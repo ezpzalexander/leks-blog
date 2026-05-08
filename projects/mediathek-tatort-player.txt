@@ -1,0 +1,22 @@
+title: Mediathek Tatort Player
+description: A local HTML player for German public broadcaster videos with EBU-TT subtitle conversion, smart search, watch history, and recommendations — built around the mediathekviewweb API.
+image: uploads/tatort.png
+tags: HTML, CSS, JavaScript
+url: 
+github: 
+featured: false
+published: true
+date: 2026-03-20
+---
+## What I built
+A self-contained HTML file that acts as a full-featured media player for German public broadcaster content (ARD, ZDF, ORF). It fetches videos and EBU-TT XML subtitles from mediathekviewweb.de, converts the subtitles to WebVTT in the browser, and renders them as a custom overlay. The sidebar has a search panel (filtered to only episodes with subtitles), a recommendations tab, watch history, and viewing statistics.
+
+## Tech stack
+- **Vanilla HTML/CSS/JS** — single file, no build step, no dependencies
+- **mediathekviewweb API** for episode search and metadata
+- **EBU-TT → WebVTT converter** written in JS using DOMParser and localName matching to handle XML namespaces correctly
+- **localStorage** for watch history, resume positions, bookmarks and user preferences
+- **CSS custom properties** for light/dark theming
+
+## What I learned
+Chrome's native `<track>` element is unreliable from `file://` URLs, so subtitles had to be rendered as a custom `<div>` overlay driven by the `timeupdate` event — which also made subtitle styling (size, colour, background) trivial to implement. The bigger issue was CORS: the mediathekviewweb API blocks cross-origin requests, which required either a proxy or running the file through a local HTTP server. EBU-TT subtitle parsing also turned out to be tricky because `querySelectorAll('p')` silently returns nothing when elements have XML namespace prefixes — the fix was switching to `getElementsByTagName('*')` and matching on `localName` instead.

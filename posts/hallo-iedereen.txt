@@ -1,0 +1,6 @@
+title: hallo iedereen!
+date: 2025-01-01
+published: true
+tags: general
+---
+okaaay lesgo
