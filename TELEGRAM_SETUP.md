@@ -18,9 +18,29 @@ This site supports two Telegram directions:
 3. Paste the bot token.
 4. Save once.
 
-## 3. Create blog posts from Telegram
+## 3. Recommended: Cloudflare Worker + static site
 
-Telegram webhooks require a public HTTPS URL. Local USBWebserver at `localhost` cannot receive Telegram webhook calls from the internet. Upload this site to a free PHP host first, then use the hosted admin page.
+InfinityFree blocks bot/API/webhook traffic with a JavaScript challenge, so Telegram cannot reliably call `telegram_webhook.php` there.
+
+Use the Cloudflare Worker in `worker/` instead:
+
+1. Create a private GitHub repo and push this project.
+2. Create a fine-grained GitHub token with repository contents write access.
+3. Deploy the Worker in `worker/`.
+4. Add these Cloudflare Worker secrets:
+   - `TELEGRAM_BOT_TOKEN`
+   - `TELEGRAM_SECRET_TOKEN`
+   - `TELEGRAM_ALLOWED_USER_IDS`
+   - `GITHUB_TOKEN`
+5. Register the Worker URL as the Telegram webhook.
+
+When you send a post to Telegram, the Worker commits a new `posts/*.txt` file to GitHub. GitHub Actions then builds the static site with `scripts/build-static.php`.
+
+GitHub Pages from a private repo requires GitHub Pro/Team/Enterprise. With GitHub Free, keep the repo private and host the generated static site on Cloudflare Pages.
+
+## 4. Old PHP webhook option
+
+Telegram webhooks require a public HTTPS URL. Local USBWebserver at `localhost` cannot receive Telegram webhook calls from the internet. This option only works on PHP hosts that do not block API/webhook calls.
 
 After hosting:
 
@@ -46,7 +66,7 @@ The first line becomes the title. Everything below it becomes the post content. 
 Draft content here.
 ```
 
-## 4. Send site posts to Telegram
+## 5. Send site posts to Telegram
 
 This is optional. It is useful if you also want the admin to share a blog article to a channel or chat.
 

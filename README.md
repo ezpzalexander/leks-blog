@@ -10,10 +10,15 @@ Small PHP blog with a Telegram bot integration.
 
 ## Hosting note
 
-GitHub Pages cannot run this site because it only serves static files. This project needs PHP for the admin area and `telegram_webhook.php`.
+The old PHP admin/webhook flow is kept in the repository, but the recommended deployment is now static:
 
-Use PHP hosting with HTTPS for the Telegram webhook. A free PHP host such as InfinityFree is a better fit for the current implementation.
+1. Telegram sends messages to a Cloudflare Worker.
+2. The Worker commits new files to `posts/` in GitHub.
+3. GitHub Actions runs `scripts/build-static.php`.
+4. The generated site in `docs/` is deployed as static HTML.
+
+GitHub Pages from a private repository requires a paid GitHub plan. If the repository must stay private on GitHub Free, use Cloudflare Pages for the static site instead.
 
 ## Telegram
 
-See `TELEGRAM_SETUP.md`.
+See `TELEGRAM_SETUP.md` and `worker/README.md`.

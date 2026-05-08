@@ -1,6 +1,8 @@
 # Runtime data and secrets
 /data/*.json
 !/data/.htaccess
+/worker/.dev.vars
+/worker/.env
 
 # Local backups
 *.bak
