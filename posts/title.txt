@@ -1,6 +1,0 @@
-title: title
-date: 2026-05-08
-published: true
-tags: telegram
----
-text
