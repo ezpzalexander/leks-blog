@@ -1,5 +1,5 @@
 # Runtime data and secrets
-/data/*.json
+/data/*
 !/data/.htaccess
 /worker/.dev.vars
 /worker/.env
