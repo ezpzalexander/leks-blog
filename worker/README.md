@@ -38,3 +38,19 @@ My post content.
 ```
 
 Use `/draft` to save an unpublished post.
+
+## Manage posts from Telegram
+
+Available commands:
+
+```text
+/list
+/delete slug
+/publish slug
+/draftify slug
+/edit slug
+New title
+New content
+```
+
+Use `/list` to see the slugs. Every change commits to GitHub and triggers the static site rebuild.
